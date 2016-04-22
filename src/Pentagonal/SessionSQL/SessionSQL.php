@@ -96,7 +96,7 @@ class SessionSQL implements SessionHandlerInterface
         // static content
         $hasLoaded = true;
         // Sanitize the cookie, because apparently PHP doesn't do that for userspace handlers
-        if ($this->configs['cookie_name'] && isset($_COOKIE[$this->configs['cookie_name'])
+        if ($this->configs['cookie_name'] && isset($_COOKIE[$this->configs['cookie_name']])
             && (
                 ! is_string($_COOKIE[$this->configs['cookie_name']])
                 // getting cookies values if invalid
