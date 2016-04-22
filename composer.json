@@ -1,0 +1,21 @@
+{
+  "name": "pentagonal/sessionsql",
+  "type": "library",
+  "license" : "MIT",
+  "description": "Session Handler Library",
+  "keywords": ["Helper", "session", "security", "handler"],
+  "homepage": "http://github.com/pentagonal/SessionSQL/",
+  "authors": [
+    {
+      "name" : "nawa",
+      "email": "nawa@yahoo.com"
+    }
+  ],
+  "version": "1.0",
+  "require": {
+    "php": ">=5.3"
+  },
+  "autoload": {
+    "psr-0": {"Pentagonal\\SessionSQL": "src/"}
+  }
+}
