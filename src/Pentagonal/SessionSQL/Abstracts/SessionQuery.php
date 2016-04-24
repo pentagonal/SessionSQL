@@ -22,6 +22,12 @@ abstract class SessionQuery implements SessionQueryInterface
      * @var string the table name
      */
     protected $table;
+
+    /**
+     * @var string
+     */
+    protected $session_lock;
+
     /**
      * @var string column for session id
      */
@@ -32,7 +38,7 @@ abstract class SessionQuery implements SessionQueryInterface
      * @param string $session_id session id
      * @return bool
      */
-    abstract public function open($session_path, $session_id);
+    abstract public function open($session_path, $session_name);
 
     /**
      * Fix session id
@@ -76,11 +82,11 @@ abstract class SessionQuery implements SessionQueryInterface
      * @return string
      * @throws \Exception
      */
-    public function selectQueryGetLock($session_id, $asLock = 'lock')
+    public function selectQueryGetLock($session_name, $asLock = 'lock')
     {
-        $session_id = $this->sessionIdFixer($session_id);
+        $this->session_lock = $session_name;
         $asLock = trim($asLock);
-        return "SELECT GET_LOCK('{$session_id}', 300) AS {$asLock}";
+        return "SELECT GET_LOCK('{$this->session_id}', 300) AS {$asLock}";
     }
 
     /**
