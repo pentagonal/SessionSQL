@@ -91,11 +91,11 @@ class SessionSQL implements SessionHandlerInterface
             $drivers = $driver;
             $driver = "\\Pentagonal\\SessionSQL\\Drivers\\".ucfirst($driver).'Driver';
             if (!in_array($drivers, $this->available_drivers)
-                || ! class_exists($driver)
+                || class_exists($driver)
             ) {
                 throw new \Exception(
                     sprintf(
-                        "Invalid Driver selected! driver %s is unavailable",
+                        "Invalid Driver selected! Driver <strong>%s</strong> is unavailable",
                         ucfirst($driver)
                     ),
                     E_USER_ERROR
