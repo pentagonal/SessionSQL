@@ -303,7 +303,7 @@ class SessionSQL implements SessionHandlerInterface
     public function open($session_path, $session_id)
     {
         $this->session_id = $session_id;
-        return (boolean) $this->open($session_path, $session_id);
+        return (boolean) $this->sqlqueryobject->open($session_path, $session_id);
     }
 
     /**
