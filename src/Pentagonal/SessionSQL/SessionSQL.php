@@ -71,8 +71,8 @@ class SessionSQL implements SessionHandlerInterface
                 ? 0
                 : time() + $this->configs['cookie_lifetime']
         );
-        if ($this->configs['session_name'] && is_string($this->configs['session_name'])) {
-            session_name($session_name);
+        if ($this->configs['cookie_name'] && is_string($this->configs['cookie_name'])) {
+            session_name($this->configs['cookie_name']);
         } else {
             $this->configs['cookie_name'] = ini_get('session.name');
             if ($this->configs['cookie_name']) {
@@ -302,6 +302,7 @@ class SessionSQL implements SessionHandlerInterface
      */
     public function open($session_path, $session_id)
     {
+        exit($session_path);
         $this->session_id = $session_id;
         return (boolean) $this->open($session_path, $session_id);
     }
