@@ -35,6 +35,11 @@ class SessionSQL implements SessionHandlerInterface
      */
     protected $fingerprint;
 
+    protected $available_drivers = array(
+        'file',
+        'sql',
+    );
+
     /**
      * Default configuration
      *
@@ -62,9 +67,8 @@ class SessionSQL implements SessionHandlerInterface
      * @param object $sqlqueryobect instance of \Pentagonal\SessionSQL\Abstracts\SessionQuery
      * @param $session_name
      */
-    public function __construct(SessionQuery $sqlqueryobect, array $config)
+    public function __construct($driver = 'file', array $config = array())
     {
-        $this->sqlqueryobject = $sqlqueryobect;
         $this->configs = array_merge($this->defaultconfig, $config);
         $this->configs['cookie_lifetime'] = (
             empty($this->configs['cookie_lifetime']) || is_numeric($this->configs['cookie_lifetime'])
@@ -78,6 +82,38 @@ class SessionSQL implements SessionHandlerInterface
             if ($this->configs['cookie_name']) {
                 session_name($this->configs['cookie_name']);
             }
+        }
+        if (is_string($driver)) {
+            $driver = strtolower($driver);
+            if (strrpos($driver, 'driver') !== false) {
+                $driver = substr($driver, 0, -7);
+            }
+            $drivers = $driver;
+            $driver = "\\Pentagonal\\SessionSQL\\Drivers\\".ucfirst($driver).'Driver';
+            if (!in_array($drivers, $this->available_drivers)
+                || ! class_exists($driver)
+            ) {
+                throw new \Exception(
+                    sprintf(
+                        "Invalid Driver selected! driver %s is unavailable",
+                        ucfirst($driver)
+                    ),
+                    E_USER_ERROR
+                );
+            }
+            if (empty($this->configs['save_path']) || !is_string($this->configs['save_path'])) {
+                $this->configs['save_path'] = null;
+            }
+            $driver = new $driver($this->configs['save_path']);
+        } elseif(!is_object($driver) || ! $driver instanceof SessionQuery) {
+                throw new \Exception(
+                   'Invalid Driver selected! driver is invalid',
+                    E_USER_ERROR
+                );
+        }
+
+        if (is_object($driver)) {
+            $this->sqlqueryobject = $driver;
         }
     }
 
@@ -93,6 +129,7 @@ class SessionSQL implements SessionHandlerInterface
         if ($hasLoaded) {
             return;
         }
+
         // static content
         $hasLoaded = true;
         // Sanitize the cookie, because apparently PHP doesn't do that for userspace handlers
@@ -125,11 +162,13 @@ class SessionSQL implements SessionHandlerInterface
                 E_ERROR
             );
         }
-
-        /**
-         * handle session with this class
-         */
-        session_set_save_handler($this, true);
+        // if has sql query object determine handle SQL with this
+        if ($this->sqlqueryobject) {
+            /**
+             * handle session with this class
+             */
+            session_set_save_handler($this, true);
+        }
 
         // check if session not valid
         if (!$this->configs['cookie_name'] || !is_string($this->configs['cookie_domain'])) {
