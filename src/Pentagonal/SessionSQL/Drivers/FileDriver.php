@@ -144,8 +144,8 @@ class FileDriver extends SessionQuery
 
             $session_data .= $buffer;
         }
-        if (strlen($session_data) >= 14) {
-            $session_data = substr($session_data, 14);
+        if (strlen($session_data) >= 13) {
+            $session_data = preg_replace('/^'.preg_quote('<?php exit;?>', '/i').'\s*/', '', $session_data);
         }
         if (!is_array($this->session_data)) {
             $this->session_data = array(

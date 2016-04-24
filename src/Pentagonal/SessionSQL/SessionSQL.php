@@ -83,37 +83,40 @@ class SessionSQL implements SessionHandlerInterface
                 session_name($this->configs['cookie_name']);
             }
         }
-        if (is_string($driver)) {
-            $driver = strtolower($driver);
-            if (strrpos($driver, 'driver') !== false) {
-                $driver = substr($driver, 0, -7);
-            }
-            $drivers = $driver;
-            $driver = "\\Pentagonal\\SessionSQL\\Drivers\\".ucfirst($driver).'Driver';
-            if (!in_array($drivers, $this->available_drivers)
-                || !class_exists($driver)
-            ) {
+        if (!is_bool($driver) && !is_null($driver)) {
+            if (is_string($driver)) {
+                $driver = strtolower($driver);
+                if (strrpos($driver, 'driver') !== false) {
+                    $driver = substr($driver, 0, -7);
+                }
+                $drivers = $driver;
+                $driver = "\\Pentagonal\\SessionSQL\\Drivers\\".ucfirst($driver).'Driver';
+                if (!in_array($drivers, $this->available_drivers)
+                    || !class_exists($driver)
+                ) {
+                    throw new \Exception(
+                        sprintf(
+                            "Invalid Driver selected! Driver <strong>%s</strong> is unavailable",
+                            ucfirst($driver)
+                        ),
+                        E_USER_ERROR
+                    );
+                }
+                if (empty($this->configs['save_path']) || !is_string($this->configs['save_path'])) {
+                    $this->configs['save_path'] = null;
+                }
+                $driver = new $driver($this->configs['save_path']);
+            } elseif (! is_object($driver) || ! $driver instanceof SessionQuery) {
                 throw new \Exception(
-                    sprintf(
-                        "Invalid Driver selected! Driver <strong>%s</strong> is unavailable",
-                        ucfirst($driver)
-                    ),
+                    'Invalid Driver, Driver must be instance of '
+                        . '<strong>\\Pentagonal\\SessionSQL\\Abstracts\\SessionQuery</strong>',
                     E_USER_ERROR
                 );
             }
-            if (empty($this->configs['save_path']) || !is_string($this->configs['save_path'])) {
-                $this->configs['save_path'] = null;
+            // it will be check and take back into default session handler
+            if (is_object($driver)) {
+                $this->sqlqueryobject = $driver;
             }
-            $driver = new $driver($this->configs['save_path']);
-        } elseif(!is_object($driver) || ! $driver instanceof SessionQuery) {
-                throw new \Exception(
-                   'Invalid Driver selected! driver is invalid',
-                    E_USER_ERROR
-                );
-        }
-
-        if (is_object($driver)) {
-            $this->sqlqueryobject = $driver;
         }
     }
 
@@ -132,17 +135,6 @@ class SessionSQL implements SessionHandlerInterface
 
         // static content
         $hasLoaded = true;
-        // Sanitize the cookie, because apparently PHP doesn't do that for userspace handlers
-        if ($this->configs['cookie_name'] && isset($_COOKIE[$this->configs['cookie_name']])
-            && (
-                ! is_string($_COOKIE[$this->configs['cookie_name']])
-                // getting cookies values if invalid
-                || ! preg_match('/^[0-9a-f]{40}$/', $_COOKIE[$this->configs['cookie_name']])
-            )
-        ) {
-            unset($_COOKIE[$this->configs['cookie_name']]);
-        }
-
         /**
          * if session status is not callable
          */
@@ -162,13 +154,27 @@ class SessionSQL implements SessionHandlerInterface
                 E_ERROR
             );
         }
+
         // if has sql query object determine handle SQL with this
-        if ($this->sqlqueryobject) {
-            /**
-             * handle session with this class
-             */
-            session_set_save_handler($this, true);
+        if (!$this->sqlqueryobject) {
+            return;
         }
+
+        // Sanitize the cookie, because apparently PHP doesn't do that for userspace handlers
+        if ($this->configs['cookie_name'] && isset($_COOKIE[$this->configs['cookie_name']])
+            && (
+                ! is_string($_COOKIE[$this->configs['cookie_name']])
+                // getting cookies values if invalid
+                || ! preg_match('/^[0-9a-f]{40}$/', $_COOKIE[$this->configs['cookie_name']])
+            )
+        ) {
+            unset($_COOKIE[$this->configs['cookie_name']]);
+        }
+
+        /**
+         * handle session with this class
+         */
+        session_set_save_handler($this, true);
 
         // check if session not valid
         if (!$this->configs['cookie_name'] || !is_string($this->configs['cookie_domain'])) {
