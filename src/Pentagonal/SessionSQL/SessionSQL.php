@@ -137,6 +137,22 @@ class SessionSQL implements SessionHandlerInterface
             $this->session_name = $this->configs['cookie_name'];
         }
 
+        if (empty($this->configs['session_expiration'])) {
+            $this->configs['session_expiration'] = (int) ini_get('session.gc_maxlifetime');
+        } else {
+            $this->configs['session_expiration'] = (int) $this->configs['session_expiration'];
+            ini_set('session.gc_maxlifetime', $this->configs['session_expiration']);
+        }
+
+        // Security is king
+        ini_set('session.use_trans_sid', 0);
+        ini_set('session.use_strict_mode', 1);
+        ini_set('session.use_cookies', 1);
+        ini_set('session.use_only_cookies', 1);
+        ini_set('session.hash_function', 1);
+        ini_set('session.hash_bits_per_character', 4);
+        ini_set('session.gc_probability', 1);
+
         // if session is not active start it
         if ($this->sessionStatus() !== 2) {
             // start the session
@@ -160,21 +176,6 @@ class SessionSQL implements SessionHandlerInterface
             );
         }
 
-        if (empty($this->configs['session_expiration'])) {
-            $this->configs['session_expiration'] = (int) ini_get('session.gc_maxlifetime');
-        } else {
-            $this->configs['session_expiration'] = (int) $this->configs['session_expiration'];
-            ini_set('session.gc_maxlifetime', $this->configs['session_expiration']);
-        }
-
-        // Security is king
-        ini_set('session.use_trans_sid', 0);
-        ini_set('session.use_strict_mode', 1);
-        ini_set('session.use_cookies', 1);
-        ini_set('session.use_only_cookies', 1);
-        ini_set('session.hash_function', 1);
-        ini_set('session.hash_bits_per_character', 4);
-        ini_set('session.gc_probability', 1);
     }
 
     /**
