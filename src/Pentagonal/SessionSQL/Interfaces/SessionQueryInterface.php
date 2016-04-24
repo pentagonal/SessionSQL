@@ -30,45 +30,45 @@ interface SessionQueryInterface
     /**
      * Write data into database
      *
-     * @param string $sessionid
+     * @param string $session_id
      * @param string  $data data to be inserted
      * @return integer|boolean result
      */
-    public function writeData($sessionid, $data);
+    public function writeData($session_id, $data);
 
     /**
      * Update data into database
      *
-     * @param string $sessionid
+     * @param string $session_id
      * @param string  $data data to be inserted
      * @return integer|boolean result
      */
-    public function updateData($sessionid, $data);
+    public function updateData($session_id, $data);
 
     /**
      * Replace data into database
      *
-     * @param string $sessionid
+     * @param string $session_id
      * @param string  $data data to be inserted
      * @return integer|boolean result
      */
-    public function replaceData($sessionid, $data);
+    public function replaceData($session_id, $data);
 
     /**
      * Update data into database only change timestamp only
      *
-     * @param string $sessionid
+     * @param string $session_id
      * @return integer|boolean result
      */
-    public function updateDataTimeStamp($sessionid);
+    public function updateDataTimeStamp($session_id);
 
     /**
      * Remove data by session id
      *
-     * @param $sessionid
+     * @param $session_id
      * @return boolean
      */
-    public function removeData($sessionid);
+    public function removeData($session_id);
 
     /**
      * Remove expire data determine by expired max lifetime

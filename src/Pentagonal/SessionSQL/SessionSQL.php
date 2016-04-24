@@ -274,10 +274,10 @@ class SessionSQL implements SessionHandlerInterface
      */
     protected function getLock($session_id)
     {
-        $query  = $this->sqlqueryobject->selectQueryGetLock($this->session_id, 'lock');
+        $query  = $this->sqlqueryobject->selectQueryGetLock($session_id, 'lock');
         if ($result = $this->sqlqueryobject->queryResultArray($query)) {
             if (is_array($result) && isset($result['lock']) && $result['lock']) {
-                $this->locked = $session_id;
+                $this->locked = $result['lock'];
                 return true;
             }
         }
@@ -301,10 +301,9 @@ class SessionSQL implements SessionHandlerInterface
      * @return bool The return value (usually TRUE on success, FALSE on failure).
      *              Note this value is returned internally to PHP for processing.
      */
-    public function open($session_path, $session_id)
+    public function open($session_path, $session_name)
     {
-        $this->session_id = $session_id;
-        return (boolean) $this->sqlqueryobject->open($session_path, $session_id);
+        return (boolean) $this->sqlqueryobject->open($session_path, $session_name);
     }
 
     /**
@@ -322,6 +321,9 @@ class SessionSQL implements SessionHandlerInterface
         if ($this->getLock($session_id)) {
             // Needed by write() to detect session_regenerate_id() calls
             $this->session_id = $session_id;
+            if (stripos($session_id, 'PHP') !== false) {
+                exit('read');
+            }
             // this must be an array
             $result = $this->sqlqueryobject->getFullData($session_id); # array result
             if (empty($result) || ! is_array($result)) {
@@ -338,13 +340,11 @@ class SessionSQL implements SessionHandlerInterface
                 $this->setFingerPrint('');
                 return '';
             }
-
             $result = $this->sqlqueryobject->getData($session_id);
             $this->setFingerPrint($result);
             $this->data_valid = true;
             return $result;
         }
-
         $this->setFingerPrint('');
         return '';
     }
@@ -378,23 +378,26 @@ class SessionSQL implements SessionHandlerInterface
         } elseif ($this->locked === false) {
             return false;
         }
-
+        if (stripos($session_id, 'PHP') !== false) {
+                exit('read');
+        }
         if ($this->data_valid === false
             // force set agains
-            || $this->data_valid && ! $this->sqlqueryobject->getFullData($this->session_id)
+            || $this->data_valid && ! $this->sqlqueryobject->getFullData($session_id)
         ) {
-            if ($this->sqlqueryobject->replaceData($this->session_id, $session_data)) {
+            if ($this->sqlqueryobject->replaceData($session_id, $session_data)) {
                 $this->setFingerPrint($session_data);
-                return $this->data_valid = true;
+                $this->data_valid = true;
+                return true;
             }
 
             return false;
         }
-
         if ($this->getFingerPrint() != $this->generateFingerPrint($session_data)) {
             if ($this->sqlqueryobject->updateData($this->session_id, $session_data)) {
                 $this->setFingerPrint($session_data);
-                return $this->data_valid = true;
+                $this->data_valid = true;
+                return true;
             }
         }
 
@@ -410,7 +413,7 @@ class SessionSQL implements SessionHandlerInterface
      */
     public function close()
     {
-        return (bool) ($this->locked)
+        return ($this->locked)
             ? ($this->data_valid
                && ! $this->sqlqueryobject->getData($this->session_id)
                || $this->releaseLock()

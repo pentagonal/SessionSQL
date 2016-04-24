@@ -55,7 +55,7 @@ abstract class SessionQuery implements SessionQueryInterface
             $session_id = ($this->session_id ? $this->session_id : session_id());
         } elseif (!$this->session_id && session_id()) {
             $session_id = session_id();
-        } else {
+        } elseif (!is_string($session_id)) {
             throw new \Exception(
                 'Invalid session id parameter or session has not been starterd yet!',
                 E_USER_ERROR
@@ -82,11 +82,10 @@ abstract class SessionQuery implements SessionQueryInterface
      * @return string
      * @throws \Exception
      */
-    public function selectQueryGetLock($session_name, $asLock = 'lock')
+    public function selectQueryGetLock($session_id, $asLock = 'lock')
     {
-        $this->session_lock = $session_name;
         $asLock = trim($asLock);
-        return "SELECT GET_LOCK('{$this->session_id}', 300) AS {$asLock}";
+        return "SELECT GET_LOCK('{$session_id}', 300) AS {$asLock}";
     }
 
     /**
@@ -117,45 +116,45 @@ abstract class SessionQuery implements SessionQueryInterface
     /**
      * Write data into database
      *
-     * @param string $sessionid
+     * @param string $session_id
      * @param string  $data data to be inserted
      * @return integer|boolean result
      */
-    abstract public function writeData($sessionid, $data);
+    abstract public function writeData($session_id, $data);
 
     /**
      * Update data into database
      *
-     * @param string $sessionid
+     * @param string $session_id
      * @param string  $data data to be inserted
      * @return integer|boolean result
      */
-    abstract public function updateData($sessionid, $data);
+    abstract public function updateData($session_id, $data);
 
     /**
      * Replace data into database
      *
-     * @param string $sessionid
+     * @param string $session_id
      * @param string  $data data to be inserted
      * @return integer|boolean result
      */
-    abstract public function replaceData($sessionid, $data);
+    abstract public function replaceData($session_id, $data);
 
     /**
      * Update data into database only change timestamp only
      *
-     * @param string $sessionid
+     * @param string $session_id
      * @return integer|boolean result
      */
-    abstract public function updateDataTimeStamp($sessionid);
+    abstract public function updateDataTimeStamp($session_id);
 
     /**
      * Remove data by session id
      *
-     * @param $sessionid
+     * @param $session_id
      * @return boolean
      */
-    abstract public function removeData($sessionid);
+    abstract public function removeData($session_id);
 
     /**
      * Remove expire data determine by expired max lifetime
@@ -180,10 +179,10 @@ abstract class SessionQuery implements SessionQueryInterface
     /**
      * Read session data
      *
-     * @param string $sessionid
+     * @param string $session_id
      * @return string session data
      */
-    abstract public function getFullData($sessionid);
+    abstract public function getFullData($session_id);
 
     /**
      * read sesion data and returning session data string
