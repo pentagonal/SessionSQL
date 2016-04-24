@@ -67,7 +67,7 @@ abstract class SessionQuery implements SessionQueryInterface
     public function selectQueryFromSessionId($session_id = null)
     {
         $session_id = $this->sessionIdFixer($session_id);
-        return "SELECT * FROM {$table} WHERE {$this->session_id_column}='{$session_id}' LIMIT 1";
+        return "SELECT * FROM {$this->table} WHERE {$this->session_id_column}='{$session_id}' LIMIT 1";
     }
 
     /**
