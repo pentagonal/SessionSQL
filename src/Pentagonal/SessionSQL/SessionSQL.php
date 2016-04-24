@@ -76,7 +76,7 @@ class SessionSQL implements SessionHandlerInterface
         } else {
             $this->configs['cookie_name'] = ini_get('session.name');
             if ($this->configs['cookie_name']) {
-                session_name($this->configs['session_name']);
+                session_name($this->configs['cookie_name']);
             }
         }
     }
