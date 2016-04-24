@@ -45,9 +45,9 @@ abstract class SessionQuery implements SessionQueryInterface
     {
         if ($session_id === null) {
             $session_id = $this->session_id;
-        } elseif (!is_string($session_id) && ($this->session_id || session_id()) {
+        } elseif (!is_string($session_id) && ($this->session_id || session_id())) {
             $session_id = ($this->session_id ? $this->session_id : session_id());
-        } elseif (!$this->session_id && session_id())) {
+        } elseif (!$this->session_id && session_id()) {
             $session_id = session_id();
         } else {
             throw new \Exception(
