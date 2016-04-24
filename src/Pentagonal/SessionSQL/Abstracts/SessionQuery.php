@@ -48,13 +48,13 @@ abstract class SessionQuery implements SessionQueryInterface
         } elseif (!is_string($session_id) && ($this->session_id || session_id()) {
             $session_id = ($this->session_id ? $this->session_id : session_id());
         } elseif (!$this->session_id && session_id())) {
-        $session_id = session_id();
-    } else {
-        throw new \Exception(
-            'Invalid session id parameter or session has not been starterd yet!',
-            E_USER_ERROR
-        );
-    }
+            $session_id = session_id();
+        } else {
+            throw new \Exception(
+                'Invalid session id parameter or session has not been starterd yet!',
+                E_USER_ERROR
+            );
+        }
 
         return $session_id;
     }

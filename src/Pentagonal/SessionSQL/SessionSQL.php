@@ -318,7 +318,7 @@ class SessionSQL implements SessionHandlerInterface
      */
     public function read($session_id)
     {
-        if ($this->sqlqueryobject->getLock($session_id)) {
+        if ($this->getLock($session_id)) {
             // Needed by write() to detect session_regenerate_id() calls
             $this->session_id = $session_id;
             // this must be an array
@@ -368,7 +368,7 @@ class SessionSQL implements SessionHandlerInterface
     {
         // Was the ID regenerated?
         if ($session_id !== $this->session_id) {
-            if (! $this->sqlqueryobject->releaseLock() || ! $this->sqlqueryobject->getLock($session_id)) {
+            if (! $this->releaseLock() || ! $this->getLock($session_id)) {
                 return false;
             }
 
