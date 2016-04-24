@@ -431,7 +431,7 @@ class SessionSQL implements SessionHandlerInterface
     public function destroy($session_id)
     {
         if ($this->locked) {
-            return $this->sqlqueryobject->remove($session_id)
+            return $this->sqlqueryobject->removeData($session_id)
                 ? ($this->close() && $this->cookieDestroy())
                 : false;
         }
