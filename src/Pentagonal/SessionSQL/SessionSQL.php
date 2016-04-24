@@ -91,7 +91,7 @@ class SessionSQL implements SessionHandlerInterface
             $drivers = $driver;
             $driver = "\\Pentagonal\\SessionSQL\\Drivers\\".ucfirst($driver).'Driver';
             if (!in_array($drivers, $this->available_drivers)
-                || class_exists($driver)
+                || !class_exists($driver)
             ) {
                 throw new \Exception(
                     sprintf(
